@@ -34,7 +34,7 @@
             if (!window["WebSocket"]) {
                 alert("ERROR: This browser is not for WebSocket");
             } else {
-                socket = new WebSocket("ws://localhost:8080/room");
+                socket = new WebSocket("ws://{{.Host}}/room");
                 socket.onclose = function() {
                     alert("Connection Closed");
                 }
@@ -42,7 +42,6 @@
                     messages.append($("<li>").text(e.data));
                 }
             }
-
         })
     </script>
 </body>
