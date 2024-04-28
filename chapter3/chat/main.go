@@ -17,6 +17,12 @@ import (
 	"github.com/stretchr/objx"
 )
 
+var avatars Avatar = TryAvatars{
+	UseAuthAvatar,
+	UseGravatarAvatar,
+	UseFileSystemAvatar,
+}
+
 type templateHandler struct {
 	once     sync.Once
 	filename string
@@ -85,7 +91,7 @@ func main() {
 		http.StripPrefix("/avatars/",
 			http.FileServer(http.Dir("./avatars"))))
 
-	r := newRoom(UseFileSystemAvatar)
+	r := newRoom(avatars)
 	//r.tracer = trace.New(os.Stdout)
 	http.Handle("/room", r)
 	go r.run()
