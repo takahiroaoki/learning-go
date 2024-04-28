@@ -1,0 +1,5 @@
+{
+    "clientId": "dummy",
+    "clientSecret": "dummy",
+    "redirectUrl": "http://localhost:8080/auth/callback/google"
+}
