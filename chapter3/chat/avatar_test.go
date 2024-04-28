@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestAuthAvatar(t *testing.T) {
 	var authAvatar AuthAvatar
@@ -28,7 +32,7 @@ func TestGravatarAvatar(t *testing.T) {
 	var gravatarAvatar GravatarAvatar
 	client := new(client)
 	client.userData = map[string]interface{}{
-		"email": "user@test.com",
+		"userid": "1460318498c1f53bb880ce2e6d9ef64b",
 	}
 	url, err := gravatarAvatar.GetAvatarURL(client)
 	if err != nil {
@@ -36,5 +40,24 @@ func TestGravatarAvatar(t *testing.T) {
 	}
 	if url != "//www.gravatar.com/avatar/1460318498c1f53bb880ce2e6d9ef64b" {
 		t.Errorf("GravatarAvatar.GetAvatarURL returned a wrong value: %s", url)
+	}
+}
+
+func TestFileSystemAvatar(t *testing.T) {
+	filename := filepath.Join("avatars", "abc.jpg")
+	os.WriteFile(filename, []byte{}, 0777)
+	defer func() {
+		os.Remove(filename)
+	}()
+
+	var fileSystemAvatar FileSystemAvatar
+	client := new(client)
+	client.userData = map[string]interface{}{"userid": "abc"}
+	url, err := fileSystemAvatar.GetAvatarURL(client)
+	if err != nil {
+		t.Error("FileSystemAvatar.GetAvatarURL should not return any errors")
+	}
+	if url != "/avatars/abc.jpg" {
+		t.Errorf("FileSystemAvatar.GetAvatarURL returned wrongly %s", url)
 	}
 }
