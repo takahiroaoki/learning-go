@@ -1,4 +1,4 @@
-module chapter1/chat
+module chat
 
 go 1.22.2
 
