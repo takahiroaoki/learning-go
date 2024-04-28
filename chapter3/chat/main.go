@@ -18,9 +18,9 @@ import (
 )
 
 var avatars Avatar = TryAvatars{
+	UseFileSystemAvatar,
 	UseAuthAvatar,
 	UseGravatarAvatar,
-	UseFileSystemAvatar,
 }
 
 type templateHandler struct {
