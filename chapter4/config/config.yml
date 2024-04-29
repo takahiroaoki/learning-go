@@ -1,0 +1,4 @@
+api:
+    big-huge-thesaurus:
+        url: http://words.bighugelabs.com/api/2/
+        key: 5fc68bd7f062642299a951f5ea404390
