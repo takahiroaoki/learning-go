@@ -1,12 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
+	"time"
 )
 
 type poll struct {
@@ -31,36 +29,34 @@ func handlePolls(w http.ResponseWriter, r *http.Request) {
 	respondHTTPErr(w, r, http.StatusNotFound)
 }
 
-type dbData struct {
-	Polls []*poll `json:"polls"`
+var dbMockData = []*poll{
+	{
+		ID:      "1",
+		Title:   "test1",
+		Options: []string{"one", "two", "three"},
+		Results: map[string]int{
+			"one":   100,
+			"two":   200,
+			"three": 300,
+		},
+	},
+	{
+		ID:      "2",
+		Title:   "test2",
+		Options: []string{"one", "two", "three"},
+		Results: map[string]int{
+			"one":   500,
+			"two":   600,
+			"three": 700,
+		},
+	},
 }
 
 func handlePollsGet(w http.ResponseWriter, r *http.Request) {
-	/*
-		db := GetVar(r, "db").(*mgo.Database)
-
-			c := db.C("polls")
-			var q *mgo.Query
-	*/
-	jsonFile, err := os.Open("db.json")
-	if err != nil {
-		fmt.Println("Failed to open json file", err)
-		return
-	}
-	defer jsonFile.Close()
-	jsonData, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		fmt.Println("Failed to read json file", err)
-		return
-	}
-	var dbData dbData
-	json.Unmarshal(jsonData, &dbData)
-	var polls []*poll = dbData.Polls
-
 	p := NewPath(r.URL.Path)
 	var result []*poll
 	if p.HasID() {
-		for _, poll := range polls {
+		for _, poll := range dbMockData {
 			if poll.ID == p.ID {
 				result = append(result, poll)
 				break
@@ -70,13 +66,22 @@ func handlePollsGet(w http.ResponseWriter, r *http.Request) {
 			respondErr(w, r, http.StatusNotFound, fmt.Errorf("id %s is not found", p.ID))
 		}
 	} else {
-		result = append(result, polls...)
+		result = append(result, dbMockData...)
 	}
 	respond(w, r, http.StatusOK, &result)
 }
 
 func handlePollsPost(w http.ResponseWriter, r *http.Request) {
-	respondErr(w, r, http.StatusInternalServerError, errors.New("Not implemented yet"))
+	var p poll
+	if err := decodeBody(r, &p); err != nil {
+		respondErr(w, r, http.StatusBadRequest, "Failed to decode item", err)
+	}
+	p.ID = fmt.Sprint(time.Now().UTC().UnixNano())
+
+	dbMockData = append(dbMockData, &p)
+
+	w.Header().Set("Location", "polls/"+p.ID)
+	respond(w, r, http.StatusCreated, nil)
 }
 
 func handlePollsDelete(w http.ResponseWriter, r *http.Request) {
