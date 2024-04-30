@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -24,6 +23,10 @@ func handlePolls(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 		handlePollsDelete(w, r)
+		return
+	case "OPTIONS":
+		w.Header().Add("Access-Control-Allow-Methods", "DELETE")
+		respond(w, r, http.StatusOK, nil)
 		return
 	}
 	respondHTTPErr(w, r, http.StatusNotFound)
@@ -85,5 +88,21 @@ func handlePollsPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePollsDelete(w http.ResponseWriter, r *http.Request) {
-	respondErr(w, r, http.StatusInternalServerError, errors.New("Not implemented yet"))
+	p := NewPath(r.URL.Path)
+	if !p.HasID() {
+		respondErr(w, r, http.StatusMethodNotAllowed, "Cannot delete all items")
+		return
+	}
+	originalLen := len(dbMockData)
+	for i, poll := range dbMockData {
+		if poll.ID == p.ID {
+			dbMockData = dbMockData[:i+copy(dbMockData[i:], dbMockData[i+1:])]
+			break
+		}
+	}
+	if originalLen == len(dbMockData) {
+		respondErr(w, r, http.StatusBadRequest, "not found")
+		return
+	}
+	respond(w, r, http.StatusOK, nil)
 }
