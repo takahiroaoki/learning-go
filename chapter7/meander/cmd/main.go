@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	meander.APIKey = "AIzaSyBr1r46HGTRrnt4BO5iAoamTLcryWJIl2A"
+	// FIXME: Generate Google Maps API key
+	meander.APIKey = "DUMMY"
 	http.HandleFunc("/journeys", cors(func(w http.ResponseWriter, r *http.Request) {
 		respond(w, r, meander.Journeys)
 	}))
